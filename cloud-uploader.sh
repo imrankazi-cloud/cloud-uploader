@@ -23,14 +23,14 @@ if [! -f "$FILE"]; then
     exit 1
 fi
 
-#Copy file to s3 bucket
+#Copy file to s3 bucket and added progress bar
 if [-z "$TARGET_PATH"]; then
-    aws s3 cp "$FILE" "s3://$BUCKET/"
+   pv "$FILE" | aws s3 cp "$FILE" "s3://$BUCKET/"
 else
-    aws s3 cp "$FILE" "s3://$BUCKET/$TARGET_PATH"
+   pv "$FILE" | aws s3 cp "$FILE" "s3://$BUCKET/$TARGET_PATH"
 fi
 
-$ Check file uploaded successfully
+# Check file uploaded successfully
 
 if ["$?" -eq 0]; then
     echo "File uploaded successfully."
@@ -38,4 +38,8 @@ else
     echo "File upload failed."
 fi
 
+#Create shareable link
+
+SHARE_URL=$(aws s3 presign"s3://$BUCKET/$(basename $FILE)")
+echo "File uploaded successfully. Shareable link: $SHARE_URL"
 
